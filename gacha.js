@@ -247,20 +247,132 @@ function updateRarityCharts() {
   }
 }
 
+
+// Hall of Shame data
+let shameBatchCounts = [];
+let shameChart = null;
+
+function simulateShameRun() {
+  // Pull batches until 3 Target SSR are hit, record total batches needed
+  let count = 0;
+  let batch = 0;
+  while (count < 3) {
+    batch++;
+    // Pitty mechanic: every 20th batch after the first 20, increase Target SSR count by 1
+    if (batch > 21 && (batch - 1) % 20 === 0) {
+      count++;
+      if (count >= 3) break;
+    }
+    for (let i = 0; i < 10; ++i) {
+      let roll = Math.random();
+      let cumulative = 0;
+      for (let rarity of RATES) {
+        cumulative += rarity.rate;
+        if (roll < cumulative) {
+          if (rarity.name === "Target SSR") {
+            count++;
+          }
+          break;
+        }
+      }
+    }
+  }
+  return batch;
+}
+
+function updateShameChart() {
+  // Only show runs that took more than 20 batches
+  const over20 = shameBatchCounts.filter(x => x > 20);
+  const hist = {};
+  over20.forEach(x => { hist[x] = (hist[x] || 0) + 1; });
+  const xs = Object.keys(hist).map(Number).sort((a, b) => a - b);
+  const ys = xs.map(x => hist[x]);
+  const ctx = document.getElementById("shameChart").getContext("2d");
+  if (!shameChart) {
+    shameChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: xs,
+        datasets: [{
+          label: 'Runs needing >20 batches for 3 Target SSR',
+          data: ys,
+          backgroundColor: '#e57373'
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Batches needed' }, ticks: { font: { size: 10 } } },
+          y: { title: { display: true, text: 'Runs' }, beginAtZero: true, ticks: { font: { size: 10 } } }
+        },
+        responsive: false,
+        maintainAspectRatio: false
+      }
+    });
+  } else {
+    shameChart.data.labels = xs;
+    shameChart.data.datasets[0].data = ys;
+    shameChart.update();
+  }
+}
+
+function updateShameStats() {
+  if (shameBatchCounts.length === 0) {
+    document.getElementById("shameStats").innerHTML = '<i>No data yet.</i>';
+    return;
+  }
+  // Percentile buckets with MODE, MEDIAN, MEAN
+  let percentiles = [0, 20, 40, 60, 80, 100];
+  let sorted = [...shameBatchCounts].sort((a, b) => a - b);
+  let percentileStats = '';
+  for (let i = 0; i < percentiles.length - 1; ++i) {
+    let pStart = percentiles[i];
+    let pEnd = percentiles[i+1];
+    let startIdx = Math.floor((pStart/100) * sorted.length);
+    let endIdx = Math.ceil((pEnd/100) * sorted.length);
+    let bucket = sorted.slice(startIdx, endIdx);
+    let bucketLabel = `${pStart+1}-${pEnd}th percentile`;
+    if (pStart === 0) bucketLabel = `1-${pEnd}th percentile`;
+    if (bucket.length === 0) {
+      percentileStats += `<li>${bucketLabel}: N/A</li>`;
+    } else {
+      let m = mode(bucket);
+      let med = median(bucket);
+      let meanVal = mean(bucket).toFixed(2);
+      percentileStats += `<li>${bucketLabel}: MODE=${m}, MEDIAN=${med}, MEAN=${meanVal}</li>`;
+    }
+  }
+  let maxBatch = Math.max(...shameBatchCounts);
+  document.getElementById("shameStats").innerHTML = `
+    <ul>
+      <li>Highest batch count to get 3 Target SSR: ${maxBatch}</li>
+      ${percentileStats}
+    </ul>
+  `;
+}
+
 document.getElementById("runBtn").addEventListener("click", () => {
-  const runCount = Math.max(1, Math.min(10000, parseInt(document.getElementById("runCount").value) || 1));
+  const runCount = Math.max(1, Math.min(1000000, parseInt(document.getElementById("runCount").value) || 1));
   let newRuns = [];
+  let newShame = [];
   for (let i = 0; i < runCount; ++i) {
     const runStats = simulateRun();
     allRuns.push(runStats);
     newRuns.push(runStats);
+    // Hall of Shame
+    newShame.push(simulateShameRun());
   }
+  shameBatchCounts.push(...newShame);
   updateRecentStats(newRuns);
   updateAggregateStats();
   updateRarityCharts();
+  updateShameChart();
+  updateShameStats();
 });
 
 // Initial state: show empty
 updateRecentStats([]);
 updateAggregateStats();
 updateRarityCharts();
+updateShameChart();
+updateShameStats();
