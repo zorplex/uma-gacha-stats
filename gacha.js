@@ -110,12 +110,18 @@ function updateAggregateStats() {
   const { totals, minBatchesArr } = aggregateStats(allRuns);
   // Calculate percent for runs with 4 Target SSR
   let percentWith4 = allRuns.length > 0 ? ((minBatchesArr.length / allRuns.length) * 100).toFixed(1) : "0.0";
+  // Calculate total pulls
+  let totalPulls = allRuns.length * MAX_DRAWS;
+  let percentTargetSSR = totalPulls > 0 ? ((totals["Target SSR"] / totalPulls) * 100).toFixed(2) : "0.00";
+  let percentSSR = totalPulls > 0 ? ((totals["SSR"] / totalPulls) * 100).toFixed(2) : "0.00";
+  let percentSR = totalPulls > 0 ? ((totals["SR"] / totalPulls) * 100).toFixed(2) : "0.00";
+  let percentR = totalPulls > 0 ? ((totals["R"] / totalPulls) * 100).toFixed(2) : "0.00";
   document.getElementById("aggregateStats").innerHTML = `
     <ul>
-      <li>Total Target SSR: ${totals["Target SSR"]}</li>
-      <li>Total SSR: ${totals["SSR"]}</li>
-      <li>Total SR: ${totals["SR"]}</li>
-      <li>Total R: ${totals["R"]}</li>
+      <li>Total Target SSR: ${totals["Target SSR"]} (${percentTargetSSR}%)</li>
+      <li>Total SSR: ${totals["SSR"]} (${percentSSR}%)</li>
+      <li>Total SR: ${totals["SR"]} (${percentSR}%)</li>
+      <li>Total R: ${totals["R"]} (${percentR}%)</li>
       <li>Runs with 4 Target SSR: ${minBatchesArr.length} / ${allRuns.length} (${percentWith4}%)</li>
     </ul>
   `;
