@@ -248,7 +248,7 @@ function updateRarityCharts() {
 }
 
 document.getElementById("runBtn").addEventListener("click", () => {
-  const runCount = Math.max(1, Math.min(1000, parseInt(document.getElementById("runCount").value) || 1));
+  const runCount = Math.max(1, Math.min(10000, parseInt(document.getElementById("runCount").value) || 1));
   let newRuns = [];
   for (let i = 0; i < runCount; ++i) {
     const runStats = simulateRun();
