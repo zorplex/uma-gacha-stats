@@ -66,8 +66,32 @@ function aggregateStats(runs) {
     totals["SSR"] += run["SSR"];
     totals["SR"] += run["SR"];
     totals["R"] += run["R"];
-    if (typeof run.minBatchesFor4TargetSSR === "number") {
-      minBatchesArr.push(run.minBatchesFor4TargetSSR);
+    // For 3 Target SSR, we need to estimate the batch in which the 3rd was obtained
+    if (run["Target SSR"] >= 3) {
+      // Simulate the run again to find the batch where the 3rd Target SSR was obtained
+      let count = 0;
+      let foundBatch = null;
+      let batch = 1;
+      outer: for (; batch <= 20; ++batch) {
+        for (let i = 0; i < 10; ++i) {
+          let roll = Math.random();
+          let cumulative = 0;
+          for (let rarity of RATES) {
+            cumulative += rarity.rate;
+            if (roll < cumulative) {
+              if (rarity.name === "Target SSR") {
+                count++;
+                if (count === 3) {
+                  foundBatch = batch;
+                  break outer;
+                }
+              }
+              break;
+            }
+          }
+        }
+      }
+      minBatchesArr.push(foundBatch !== null ? foundBatch : "N/A");
     }
   }
   return { totals, minBatchesArr };
@@ -108,8 +132,8 @@ function mode(arr) {
 
 function updateAggregateStats() {
   const { totals, minBatchesArr } = aggregateStats(allRuns);
-  // Calculate percent for runs with 4 Target SSR
-  let percentWith4 = allRuns.length > 0 ? ((minBatchesArr.length / allRuns.length) * 100).toFixed(1) : "0.0";
+  // Calculate percent for runs with 3 Target SSR
+  let percentWith3 = allRuns.length > 0 ? ((minBatchesArr.length / allRuns.length) * 100).toFixed(1) : "0.0";
   // Calculate total pulls
   let totalPulls = allRuns.length * MAX_DRAWS;
   let percentTargetSSR = totalPulls > 0 ? ((totals["Target SSR"] / totalPulls) * 100).toFixed(2) : "0.00";
@@ -122,7 +146,7 @@ function updateAggregateStats() {
       <li>Total SSR: ${totals["SSR"]} (${percentSSR}%)</li>
       <li>Total SR: ${totals["SR"]} (${percentSR}%)</li>
       <li>Total R: ${totals["R"]} (${percentR}%)</li>
-      <li>Runs with 4 Target SSR: ${minBatchesArr.length} / ${allRuns.length} (${percentWith4}%)</li>
+      <li>Runs with 3 Target SSR: ${minBatchesArr.length} / ${allRuns.length} (${percentWith3}%)</li>
     </ul>
   `;
 
