@@ -47,7 +47,7 @@ function updateRecentStats(statsArray) {
     html += `<li>
       <ul>
         <li>Target SSR: ${stats["Target SSR"]}</li>
-        <li>SSR: ${stats["SSR"]}</li>
+        <li>Off-Target SSR: ${stats["SSR"]}</li>
         <li>SR: ${stats["SR"]}</li>
         <li>R: ${stats["R"]}</li>
         <li>Min batches for 4 Target SSR: ${stats.minBatchesFor4TargetSSR}</li>
@@ -108,23 +108,55 @@ function mode(arr) {
 
 function updateAggregateStats() {
   const { totals, minBatchesArr } = aggregateStats(allRuns);
+  // Calculate percent for runs with 4 Target SSR
+  let percentWith4 = allRuns.length > 0 ? ((minBatchesArr.length / allRuns.length) * 100).toFixed(1) : "0.0";
   document.getElementById("aggregateStats").innerHTML = `
     <ul>
       <li>Total Target SSR: ${totals["Target SSR"]}</li>
       <li>Total SSR: ${totals["SSR"]}</li>
       <li>Total SR: ${totals["SR"]}</li>
       <li>Total R: ${totals["R"]}</li>
-      <li>Runs with 4 Target SSR: ${minBatchesArr.length} / ${allRuns.length}</li>
-      <li>Best (min) batches for 4 Target SSR: ${minBatchesArr.length ? Math.min(...minBatchesArr) : "N/A"}</li>
+      <li>Runs with 4 Target SSR: ${minBatchesArr.length} / ${allRuns.length} (${percentWith4}%)</li>
     </ul>
   `;
 
-  // Percentiles
-  let percentiles = [20, 40, 60, 80, 100];
-  let percentileStats = percentiles.map(p => {
-    let val = percentile(minBatchesArr, p);
-    return `<li>${p}th percentile: ${val !== null ? val : "N/A"} batches</li>`;
-  }).join("");
+  // Hall of Fame section
+  let bestBatches = minBatchesArr.length ? Math.min(...minBatchesArr) : "N/A";
+  let mostTargetSSR = allRuns.length ? Math.max(...allRuns.map(run => run["Target SSR"])) : "N/A";
+  let mostSSR = allRuns.length ? Math.max(...allRuns.map(run => run["SSR"])) : "N/A";
+  document.getElementById("hallOfFame").innerHTML = `
+    <h3>Hall of Fame</h3>
+    <ul>
+      <li>Best (min) batches for 4 Target SSR: ${bestBatches}</li>
+      <li>Most Target SSR in a run: ${mostTargetSSR}</li>
+      <li>Most SSR in a run: ${mostSSR}</li>
+    </ul>
+  `;
+
+  // Percentiles: show number of Target SSRs achieved by each percentile of ALL runs, and stats for each bucket
+  let percentiles = [0, 20, 40, 60, 80, 100];
+  let targetSSRCountsAll = allRuns.map(run => run["Target SSR"]);
+  let percentileStats = '';
+  if (targetSSRCountsAll.length > 0) {
+    let sorted = [...targetSSRCountsAll].sort((a, b) => a - b);
+    for (let i = 0; i < percentiles.length - 1; ++i) {
+      let pStart = percentiles[i];
+      let pEnd = percentiles[i+1];
+      let startIdx = Math.floor((pStart/100) * sorted.length);
+      let endIdx = Math.ceil((pEnd/100) * sorted.length);
+      let bucket = sorted.slice(startIdx, endIdx);
+      let bucketLabel = `${pStart+1}-${pEnd}th percentile`;
+      if (pStart === 0) bucketLabel = `1-${pEnd}th percentile`;
+      if (bucket.length === 0) {
+        percentileStats += `<li>${bucketLabel}: N/A</li>`;
+      } else {
+        let m = mode(bucket);
+        let med = median(bucket);
+        let meanVal = mean(bucket).toFixed(2);
+        percentileStats += `<li>${bucketLabel}: MODE=${m}, MEDIAN=${med}, MEAN=${meanVal}</li>`;
+      }
+    }
+  }
   document.getElementById("percentileStats").innerHTML = `<ul>${percentileStats}</ul>`;
 }
 
