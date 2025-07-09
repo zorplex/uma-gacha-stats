@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gacha Banner Statistics Visualizer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; background: #f9f9f9; }
+    h1 { color: #333; }
+    #runBtn { padding: 0.5em 1.5em; font-size: 1.1em; margin-bottom: 1em; }
+    #gachaChart { background: #fff; border: 1px solid #ccc; border-radius: 8px; }
+    .stat-block { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1em; margin-bottom: 1em; }
+    ul { list-style: none; padding-left: 0; }
+    li { margin-bottom: 0.3em; }
+  </style>
+</head>
+<body>
+  <h1>Gacha Banner Statistics Visualizer</h1>
+  <button id="runBtn">Run 200 Gacha Draws</button>
+  <div>
+    <canvas id="gachaChart" width="600" height="300"></canvas>
+  </div>
+  <div id="stats" class="stat-block">
+    <h2>Most Recent Run</h2>
+    <div id="recentStats"></div>
+  </div>
+  <div id="aggregate" class="stat-block">
+    <h2>Aggregate Stats</h2>
+    <div id="aggregateStats"></div>
+    <div id="percentileStats"></div>
+  </div>
+  <script src="gacha.js"></script>
+</body>
+</html>
