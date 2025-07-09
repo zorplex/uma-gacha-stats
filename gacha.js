@@ -1,8 +1,8 @@
 const RATES = [
-  { name: "Target SSR", rate: 0.0075 },
-  { name: "SSR", rate: 0.0225 },
-  { name: "SR", rate: 0.1575 },
-  { name: "R", rate: 0.8125 }
+  { name: "Target SSR", rate: 0.0075, id: "TargetSSR" },
+  { name: "SSR", rate: 0.0225, id: "SSR" },
+  { name: "SR", rate: 0.1575, id: "SR" },
+  { name: "R", rate: 0.8125, id: "R" }
 ];
 
 const BATCH_SIZE = 10;
@@ -10,7 +10,7 @@ const MAX_BATCHES = 20;
 const MAX_DRAWS = BATCH_SIZE * MAX_BATCHES;
 
 let allRuns = [];
-let chart = null;
+let rarityCharts = {};
 
 function simulateRun() {
   let counts = { "Target SSR": 0, "SSR": 0, "SR": 0, "R": 0 };
@@ -96,36 +96,51 @@ function updateAggregateStats() {
   document.getElementById("percentileStats").innerHTML = `<ul>${percentileStats}</ul>`;
 }
 
-function updateChart(stats) {
-  const ctx = document.getElementById("gachaChart").getContext("2d");
-  const data = [
-    stats["Target SSR"],
-    stats["SSR"],
-    stats["SR"],
-    stats["R"]
-  ];
-  if (!chart) {
-    chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ["Target SSR", "SSR", "SR", "R"],
-        datasets: [{
-          label: "Most Recent Run",
-          data: data,
-          backgroundColor: [
-            "#FFD700", "#C0C0C0", "#8A2BE2", "#A9A9A9"
-          ]
-        }]
-      },
-      options: {
-        scales: {
-          y: { beginAtZero: true }
+// Returns a histogram: { countValue: number of runs with that count }
+function getRarityHistogram(rarityName) {
+  const hist = {};
+  for (const run of allRuns) {
+    const count = run[rarityName];
+    hist[count] = (hist[count] || 0) + 1;
+  }
+  return hist;
+}
+
+function updateRarityCharts() {
+  for (const rarity of RATES) {
+    const hist = getRarityHistogram(rarity.name);
+    const xs = Object.keys(hist).map(Number).sort((a, b) => a - b);
+    const ys = xs.map(x => hist[x]);
+    const ctx = document.getElementById(`chart-${rarity.id}`).getContext("2d");
+    if (!rarityCharts[rarity.id]) {
+      rarityCharts[rarity.id] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: xs,
+          datasets: [{
+            label: `Runs`,
+            data: ys,
+            backgroundColor: rarity.name === "Target SSR" ? "#FFD700"
+                            : rarity.name === "SSR" ? "#C0C0C0"
+                            : rarity.name === "SR" ? "#8A2BE2"
+                            : "#A9A9A9"
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { title: { display: true, text: `${rarity.name} count in run`, font: { size: 10 } }, ticks: { font: { size: 10 } } },
+            y: { title: { display: true, text: "Runs", font: { size: 10 } }, beginAtZero: true, ticks: { font: { size: 10 } } }
+          },
+          responsive: false,
+          maintainAspectRatio: false
         }
-      }
-    });
-  } else {
-    chart.data.datasets[0].data = data;
-    chart.update();
+      });
+    } else {
+      rarityCharts[rarity.id].data.labels = xs;
+      rarityCharts[rarity.id].data.datasets[0].data = ys;
+      rarityCharts[rarity.id].update();
+    }
   }
 }
 
@@ -134,10 +149,10 @@ document.getElementById("runBtn").addEventListener("click", () => {
   allRuns.push(runStats);
   updateRecentStats(runStats);
   updateAggregateStats();
-  updateChart(runStats);
+  updateRarityCharts();
 });
 
 // Initial state
 updateRecentStats({ "Target SSR": 0, "SSR": 0, "SR": 0, "R": 0, minBatchesFor4TargetSSR: "N/A" });
 updateAggregateStats();
-updateChart({ "Target SSR": 0, "SSR": 0, "SR": 0, "R": 0 });
+updateRarityCharts();

@@ -12,14 +12,14 @@
     .stat-block { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1em; margin-bottom: 1em; }
     ul { list-style: none; padding-left: 0; }
     li { margin-bottom: 0.3em; }
+    #charts { display: flex; flex-wrap: wrap; gap: 1em; margin-bottom: 1em; }
+    .chart-container { flex: 1 1 200px; min-width: 200px; }
+    .chart-title { text-align: center; }
   </style>
 </head>
 <body>
   <h1>Gacha Banner Statistics Visualizer</h1>
   <button id="runBtn">Run 200 Gacha Draws</button>
-  <div>
-    <canvas id="gachaChart" width="600" height="300"></canvas>
-  </div>
   <div id="stats" class="stat-block">
     <h2>Most Recent Run</h2>
     <div id="recentStats"></div>
@@ -28,6 +28,24 @@
     <h2>Aggregate Stats</h2>
     <div id="aggregateStats"></div>
     <div id="percentileStats"></div>
+  </div>
+  <div id="charts">
+    <div class="chart-container">
+      <h3 class="chart-title">Target SSR</h3>
+      <canvas id="chart-TargetSSR" width="200" height="150"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3 class="chart-title">SSR</h3>
+      <canvas id="chart-SSR" width="200" height="150"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3 class="chart-title">SR</h3>
+      <canvas id="chart-SR" width="200" height="150"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3 class="chart-title">R</h3>
+      <canvas id="chart-R" width="200" height="150"></canvas>
+    </div>
   </div>
   <script src="gacha.js"></script>
 </body>
