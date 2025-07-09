@@ -80,6 +80,32 @@ function percentile(arr, p) {
   return sorted[idx];
 }
 
+function mean(arr) {
+  if (!arr.length) return 0;
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+function median(arr) {
+  if (!arr.length) return 0;
+  const sorted = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? (sorted[mid - 1] + sorted[mid]) / 2
+    : sorted[mid];
+}
+function mode(arr) {
+  if (!arr.length) return 0;
+  const freq = {};
+  arr.forEach(x => { freq[x] = (freq[x] || 0) + 1; });
+  let max = 0, modeVal = arr[0];
+  for (const k in freq) {
+    if (freq[k] > max) {
+      max = freq[k];
+      modeVal = k;
+    }
+  }
+  return modeVal;
+}
+
 function updateAggregateStats() {
   const { totals, minBatchesArr } = aggregateStats(allRuns);
   document.getElementById("aggregateStats").innerHTML = `
@@ -118,6 +144,15 @@ function updateRarityCharts() {
     const xs = Object.keys(hist).map(Number).sort((a, b) => a - b);
     const ys = xs.map(x => hist[x]);
     const ctx = document.getElementById(`chart-${rarity.id}`).getContext("2d");
+    // Collect all counts for this rarity
+    const allCounts = allRuns.map(run => run[rarity.name]);
+    // Compute stats
+    const m = mean(allCounts);
+    const med = median(allCounts);
+    const mo = mode(allCounts);
+    // Update stats display
+    document.getElementById(`stats-${rarity.id}`).innerHTML =
+      `<b>MODE:</b> ${mo} &nbsp; <b>MEDIAN:</b> ${med} &nbsp; <b>MEAN:</b> ${m.toFixed(2)}`;
     if (!rarityCharts[rarity.id]) {
       rarityCharts[rarity.id] = new Chart(ctx, {
         type: 'bar',

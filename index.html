@@ -15,6 +15,7 @@
     #charts { display: flex; flex-wrap: wrap; gap: 1em; margin-bottom: 1em; }
     .chart-container { flex: 1 1 200px; min-width: 200px; }
     .chart-title { text-align: center; }
+    .chart-stats { font-size: 0.95em; text-align: center; margin-top: 0.2em; }
   </style>
 </head>
 <body>
@@ -37,18 +38,22 @@
     <div class="chart-container">
       <h3 class="chart-title">Target SSR</h3>
       <canvas id="chart-TargetSSR" width="200" height="150"></canvas>
+      <div id="stats-TargetSSR" class="chart-stats"></div>
     </div>
     <div class="chart-container">
       <h3 class="chart-title">SSR</h3>
       <canvas id="chart-SSR" width="200" height="150"></canvas>
+      <div id="stats-SSR" class="chart-stats"></div>
     </div>
     <div class="chart-container">
       <h3 class="chart-title">SR</h3>
       <canvas id="chart-SR" width="200" height="150"></canvas>
+      <div id="stats-SR" class="chart-stats"></div>
     </div>
     <div class="chart-container">
       <h3 class="chart-title">R</h3>
       <canvas id="chart-R" width="200" height="150"></canvas>
+      <div id="stats-R" class="chart-stats"></div>
     </div>
   </div>
   <script src="gacha.js"></script>
