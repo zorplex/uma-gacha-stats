@@ -19,9 +19,13 @@
 </head>
 <body>
   <h1>Gacha Banner Statistics Visualizer</h1>
-  <button id="runBtn">Run 200 Gacha Draws</button>
-  <div id="stats" class="stat-block">
-    <h2>Most Recent Run</h2>
+  <div style="display: flex; align-items: center; gap: 1em; margin-bottom: 1em;">
+    <button id="runBtn">Run Gacha</button>
+    <label for="runCount">Number of runs:</label>
+    <input type="number" id="runCount" min="1" max="1000" value="1" style="width: 4em;">
+  </div>
+  <div id="stats" class="stat-block" style="max-height: 250px; overflow-y: auto;">
+    <h2>Most Recent Run(s)</h2>
     <div id="recentStats"></div>
   </div>
   <div id="aggregate" class="stat-block">

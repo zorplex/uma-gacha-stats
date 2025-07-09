@@ -40,16 +40,22 @@ function simulateRun() {
   return { ...counts, minBatchesFor4TargetSSR };
 }
 
-function updateRecentStats(stats) {
-  document.getElementById("recentStats").innerHTML = `
-    <ul>
-      <li>Target SSR: ${stats["Target SSR"]}</li>
-      <li>SSR: ${stats["SSR"]}</li>
-      <li>SR: ${stats["SR"]}</li>
-      <li>R: ${stats["R"]}</li>
-      <li>Min batches for 4 Target SSR: ${stats.minBatchesFor4TargetSSR}</li>
-    </ul>
-  `;
+function updateRecentStats(statsArray) {
+  // statsArray: array of stats objects
+  let html = '<ol style="padding-left: 1.5em;">';
+  statsArray.forEach((stats, idx) => {
+    html += `<li>
+      <ul>
+        <li>Target SSR: ${stats["Target SSR"]}</li>
+        <li>SSR: ${stats["SSR"]}</li>
+        <li>SR: ${stats["SR"]}</li>
+        <li>R: ${stats["R"]}</li>
+        <li>Min batches for 4 Target SSR: ${stats.minBatchesFor4TargetSSR}</li>
+      </ul>
+    </li>`;
+  });
+  html += '</ol>';
+  document.getElementById("recentStats").innerHTML = html;
 }
 
 function aggregateStats(runs) {
@@ -145,14 +151,19 @@ function updateRarityCharts() {
 }
 
 document.getElementById("runBtn").addEventListener("click", () => {
-  const runStats = simulateRun();
-  allRuns.push(runStats);
-  updateRecentStats(runStats);
+  const runCount = Math.max(1, Math.min(1000, parseInt(document.getElementById("runCount").value) || 1));
+  let newRuns = [];
+  for (let i = 0; i < runCount; ++i) {
+    const runStats = simulateRun();
+    allRuns.push(runStats);
+    newRuns.push(runStats);
+  }
+  updateRecentStats(newRuns);
   updateAggregateStats();
   updateRarityCharts();
 });
 
-// Initial state
-updateRecentStats({ "Target SSR": 0, "SSR": 0, "SR": 0, "R": 0, minBatchesFor4TargetSSR: "N/A" });
+// Initial state: show empty
+updateRecentStats([]);
 updateAggregateStats();
 updateRarityCharts();
