@@ -370,6 +370,35 @@ document.getElementById("runBtn").addEventListener("click", () => {
   updateShameStats();
 });
 
+// Add Reset button handler
+document.getElementById("resetBtn").addEventListener("click", () => {
+  // Clear all data
+  allRuns = [];
+
+  // Destroy all rarity charts if they exist
+  for (const key in rarityCharts) {
+    if (rarityCharts[key]) {
+      rarityCharts[key].destroy();
+      rarityCharts[key] = null;
+    }
+  }
+  rarityCharts = {};
+
+  // Destroy shame chart if it exists
+  if (shameChart) {
+    shameChart.destroy();
+    shameChart = null;
+  }
+  shameBatchCounts = [];
+
+  // Reset UI to initial state
+  updateRecentStats([]);
+  updateAggregateStats();
+  updateRarityCharts();
+  updateShameChart();
+  updateShameStats();
+});
+
 // Initial state: show empty
 updateRecentStats([]);
 updateAggregateStats();
