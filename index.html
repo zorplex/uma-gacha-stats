@@ -5,6 +5,50 @@
   <title>Gacha Banner Statistics Visualizer</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    /* Rainbow gradient animation for Target SSR pulls */
+    .rainbow-text {
+      background: linear-gradient(270deg, #ff00cc, #3333ff, #00ffcc, #ffff00, #ff6600, #ff00cc);
+      background-size: 1200% 1200%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow-move 3s linear infinite;
+      font-weight: bold;
+      font-size: 1.2em;
+      filter: drop-shadow(0 0 6px #fff7);
+    }
+    .rainbow-success {
+      display: inline-block;
+      font-size: 2.2em;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      background: linear-gradient(270deg, #ff00cc, #3333ff, #00ffcc, #ffff00, #ff6600, #ff00cc);
+      background-size: 1200% 1200%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow-move 2.5s linear infinite;
+      filter: drop-shadow(0 0 10px #fff7);
+      margin-bottom: 0.2em;
+      opacity: 1;
+      transition: opacity 1.2s linear, transform 1.2s cubic-bezier(0.4,0,0.2,1);
+      will-change: opacity, transform;
+    }
+    @keyframes rainbow-move {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    /* Particle canvas overlay */
+    #rainbow-particles {
+      position: fixed;
+      pointer-events: none;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      z-index: 9999;
+      display: none;
+    }
+  </style>
+  <style>
     body { font-family: Arial, sans-serif; margin: 2em; background: #f9f9f9; }
     h1 { color: #333; }
     #runBtn, #resetBtn { padding: 0.5em 1.5em; font-size: 1.1em; margin-bottom: 1em; }
@@ -37,6 +81,7 @@
     <label for="runCount">Number of runs:</label>
     <input type="number" id="runCount" min="1" max="10000" value="1" style="width: 6em;">
   </div>
+  <div id="successBanner" style="position: fixed; left: 0; top: 40px; width: 100vw; text-align: center; pointer-events: none; z-index: 10001;"></div>
   <div id="stats" class="stat-block" style="max-height: 250px; overflow-y: auto;">
     <h2>Most Recent Run(s)</h2>
     <div id="recentStats"></div>
@@ -76,6 +121,7 @@
     </div>
     <div id="shameStats"></div>
   </div>
+  <canvas id="rainbow-particles"></canvas>
   <script src="gacha.js"></script>
 </body>
 </html>
